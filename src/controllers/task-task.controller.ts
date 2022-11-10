@@ -8,7 +8,6 @@ import {
 } from '@loopback/rest';
 import {
   Task,
-  Task,
 } from '../models';
 import {TaskRepository} from '../repositories';
 

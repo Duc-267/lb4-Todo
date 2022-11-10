@@ -26,26 +26,6 @@ export class UserController {
     public userRepository : UserRepository,
   ) {}
 
-  @post('/users')
-  @response(200, {
-    description: 'User model instance',
-    content: {'application/json': {schema: getModelSchemaRef(User)}},
-  })
-  async create(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(User, {
-            title: 'NewUser',
-            exclude: ['id'],
-          }),
-        },
-      },
-    })
-    user: Omit<User, 'id'>,
-  ): Promise<User> {
-    return this.userRepository.create(user);
-  }
 
   @get('/users/count')
   @response(200, {

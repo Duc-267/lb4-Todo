@@ -1,4 +1,5 @@
 import {BootMixin} from '@loopback/boot';
+import {SECURITY_SCHEME_SPEC} from '@loopback/authentication-jwt';
 import {ApplicationConfig} from '@loopback/core';
 import {
   RestExplorerBindings,
@@ -8,8 +9,11 @@ import {RepositoryMixin} from '@loopback/repository';
 import {RestApplication} from '@loopback/rest';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
+import {PasswordHasherBindings, TokenServiceBindings, TokenServiceConstants, UserServiceBindings} from './keys';
 import {MySequence} from './sequence';
-
+import {BcryptHasher} from './services/hash.password';
+import {JWTService} from './services/jwt-service';
+import {MyUserService} from './services/user-service';
 export {ApplicationConfig};
 
 export class TodoApplication extends BootMixin(
@@ -17,6 +21,11 @@ export class TodoApplication extends BootMixin(
 ) {
   constructor(options: ApplicationConfig = {}) {
     super(options);
+    // setup binding
+    this.setupBinding();
+
+    // Add security spec
+    this.addSecuritySpec();
 
     // Set up the custom sequence
     this.sequence(MySequence);
@@ -40,5 +49,30 @@ export class TodoApplication extends BootMixin(
         nested: true,
       },
     };
+  }
+  setupBinding(): void {
+    this.bind(PasswordHasherBindings.PASSWORD_HASHER).toClass(BcryptHasher);
+    this.bind(PasswordHasherBindings.ROUNDS).to(10)
+    this.bind(UserServiceBindings.USER_SERVICE).toClass(MyUserService);
+    this.bind(TokenServiceBindings.TOKEN_SERVICE).toClass(JWTService);
+    this.bind(TokenServiceBindings.TOKEN_SECRET).to(TokenServiceConstants.TOKEN_SECRET_VALUE)
+    this.bind(TokenServiceBindings.TOKEN_EXPIRES_IN).to(TokenServiceConstants.TOKEN_EXPIRES_IN_VALUE);
+  }
+  addSecuritySpec(): void {
+    this.api({
+      openapi: '3.0.0',
+      info: {
+        title: 'test application',
+        version: '1.0.0',
+      },
+      paths: {},
+      components: {securitySchemes: SECURITY_SCHEME_SPEC},
+      security: [
+        {
+          jwt: [],
+        },
+      ],
+      servers: [{url: '/'}],
+    });
   }
 }
