@@ -1,0 +1,64 @@
+@startuml SET2020
+entity Project {
+  -id: ObjectID <<generated>>
+  --
+  ~createdBy: ObjectID
+  ~updatedBy: ObjectID
+  --
+  *name: String
+  *createdAt: Date
+  updatedAt: Date
+  isDeleted: Boolean
+}
+entity ProjectUser {
+  -id: ObjectID <<generated>>
+  --
+  ~projectId: ObjectID 
+  ~userId: ObjectID 
+  --
+  *role: ERole
+}
+entity User {
+  -id: ObjectID <<generated>>
+  --
+  *email: String
+  *password: String
+  *createdAt: Date
+  name: String
+  updatedAt: Date
+  isDeleted: Boolean
+}
+entity Task {
+  -id: ObjectID <<generated>>
+  --
+  ~projectID: ObjectID
+  ~assignedTo: ObjectID
+  ~createdBy: ObjectID
+  ~linkedTo: ObjectID
+  ~updatedBy: ObjectID
+  --
+  *name: String
+  *createdAt: Date
+  *isCreatedByAdmin: Boolean
+  updatedAt: Date
+  isDeleted: Boolean
+  status: EStatus
+}
+enum ERole {
+  ADMIN
+  USER
+}
+enum EStatus {
+    TODO
+    IN_PROGRESS
+    DONE
+}
+
+User ||--o{ Task
+User ||--o{ ProjectUser
+Project ||--o{ ProjectUser
+Project ||--o{ Task
+Task ||--o| Task
+ProjectUser -- ERole
+Task -- EStatus
+@enduml
