@@ -1,4 +1,6 @@
-import {Entity, model, property} from '@loopback/repository';
+import {Entity, model, property, belongsTo} from '@loopback/repository';
+import {User} from './user.model';
+import {Project} from './project.model';
 
 @model()
 export class Task extends Entity {
@@ -17,7 +19,7 @@ export class Task extends Entity {
 
   @property({
     type: 'date',
-    required: true,
+    default: () => new Date(),
   })
   createdAt: string;
 
@@ -29,6 +31,7 @@ export class Task extends Entity {
 
   @property({
     type: 'date',
+    default: () => new Date(),
   })
   updatedAt?: string;
 
@@ -43,6 +46,17 @@ export class Task extends Entity {
   })
   status?: string;
 
+  @belongsTo(() => User, {name: 'creator'})
+  createdBy: string;
+
+  @belongsTo(() => User, {name: 'assignee'})
+  asignedTo: string;
+
+  @belongsTo(() => Project)
+  projectId: string;
+
+  @belongsTo(() => Task, {name: 'linked'})
+  linkedTo: string;
 
   constructor(data?: Partial<Task>) {
     super(data);

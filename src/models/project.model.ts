@@ -17,17 +17,19 @@ export class Project extends Entity {
 
   @property({
     type: 'date',
-    required: true,
+    default: () => new Date(),
   })
   createdAt: string;
 
   @property({
     type: 'date',
+    default: () => new Date(),
   })
   updatedAt?: string;
 
   @property({
     type: 'boolean',
+    default: false,
   })
   isDeleted?: boolean;
 
