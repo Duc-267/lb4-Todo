@@ -1,4 +1,5 @@
 import {BootMixin} from '@loopback/boot';
+import {AuthenticationComponent, registerAuthenticationStrategy} from '@loopback/authentication';
 import {SECURITY_SCHEME_SPEC} from '@loopback/authentication-jwt';
 import {ApplicationConfig} from '@loopback/core';
 import {
@@ -10,10 +11,9 @@ import {RestApplication} from '@loopback/rest';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
 import {PasswordHasherBindings, TokenServiceBindings, TokenServiceConstants, UserServiceBindings} from './keys';
+import {JWTStrategy} from './authentication/authentication';
 import {MySequence} from './sequence';
-import {BcryptHasher} from './services/hash.password';
-import {JWTService} from './services/jwt-service';
-import {MyUserService} from './services/user-service';
+import {BcryptHasher, JWTService, MyUserService} from './services';
 export {ApplicationConfig};
 
 export class TodoApplication extends BootMixin(
@@ -27,6 +27,8 @@ export class TodoApplication extends BootMixin(
     // Add security spec
     this.addSecuritySpec();
 
+    this.component(AuthenticationComponent);
+    registerAuthenticationStrategy(this, JWTStrategy)
     // Set up the custom sequence
     this.sequence(MySequence);
 

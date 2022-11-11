@@ -17,9 +17,11 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
+import {authenticate} from '@loopback/authentication';
 import {Task} from '../models';
 import {TaskRepository} from '../repositories';
 
+@authenticate('jwt')
 export class TaskController {
   constructor(
     @repository(TaskRepository)
@@ -46,6 +48,7 @@ export class TaskController {
   ): Promise<Task> {
     return this.taskRepository.create(task);
   }
+
 
   @get('/tasks/count')
   @response(200, {
