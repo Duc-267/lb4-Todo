@@ -1,3 +1,4 @@
+import { authenticate } from '@loopback/authentication';
 import {
   repository,
 } from '@loopback/repository';
@@ -12,16 +13,17 @@ import {
 } from '../models';
 import {TaskRepository} from '../repositories';
 
+@authenticate('jwt')
 export class TaskUserController {
   constructor(
     @repository(TaskRepository)
     public taskRepository: TaskRepository,
   ) { }
 
-  @get('/tasks/{id}/user', {
+  @get('/tasks/{id}/creator', {
     responses: {
       '200': {
-        description: 'User belonging to Task',
+        description: 'Creator of Task',
         content: {
           'application/json': {
             schema: {type: 'array', items: getModelSchemaRef(User)},
@@ -30,9 +32,27 @@ export class TaskUserController {
       },
     },
   })
-  async getUser(
+  async getCreator(
     @param.path.string('id') id: typeof Task.prototype.id,
   ): Promise<User> {
     return this.taskRepository.creator(id);
+  }
+
+  @get('/tasks/{id}/assignee', {
+    responses: {
+      '200': {
+        description: 'Assignee of Task',
+        content: {
+          'application/json': {
+            schema: {type: 'array', items: getModelSchemaRef(User)},
+          },
+        },
+      },
+    },
+  })
+  async getAssignee(
+    @param.path.string('id') id: typeof Task.prototype.id,
+  ): Promise<User> {
+    return this.taskRepository.assignee(id);
   }
 }

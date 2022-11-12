@@ -1,4 +1,5 @@
-import { authenticate } from '@loopback/authentication';
+import { authenticate, AuthenticationBindings } from '@loopback/authentication';
+import { inject } from '@loopback/core';
 import {
   Count,
   CountSchema,
@@ -8,7 +9,6 @@ import {
   Where,
 } from '@loopback/repository';
 import {
-  post,
   param,
   get,
   getModelSchemaRef,
@@ -18,13 +18,21 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
+import { PasswordHasherBindings, UserServiceBindings } from '../keys';
 import {User} from '../models';
 import {UserRepository} from '../repositories';
+import { BcryptHasher, MyUserService } from '../services';
+import { HttpErrors } from '@loopback/rest';
+import { UserProfile} from '@loopback/security';
 @authenticate('jwt')
 export class UserController {
   constructor(
     @repository(UserRepository)
     public userRepository : UserRepository,
+    @inject(PasswordHasherBindings.PASSWORD_HASHER)
+    public hasher: BcryptHasher,
+    @inject(UserServiceBindings.USER_SERVICE)
+    public userService: MyUserService,
   ) {}
 
 
@@ -57,25 +65,6 @@ export class UserController {
     return this.userRepository.find(filter);
   }
 
-  @patch('/users')
-  @response(200, {
-    description: 'User PATCH success count',
-    content: {'application/json': {schema: CountSchema}},
-  })
-  async updateAll(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(User, {partial: true}),
-        },
-      },
-    })
-    user: User,
-    @param.where(User) where?: Where<User>,
-  ): Promise<Count> {
-    return this.userRepository.updateAll(user, where);
-  }
-
   @get('/users/{id}')
   @response(200, {
     description: 'User model instance',
@@ -98,16 +87,31 @@ export class UserController {
   })
   async updateById(
     @param.path.string('id') id: string,
+    @inject(AuthenticationBindings.CURRENT_USER)
+    currentUser: UserProfile,
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(User, {partial: true}),
+          schema: getModelSchemaRef(User, {
+            partial: true,
+            exclude: ['id', 'createdAt', 'updatedAt', 'isDeleted'],
+          }),
         },
       },
     })
     user: User,
   ): Promise<void> {
-    await this.userRepository.updateById(id, user);
+    if (currentUser.id !== id) {
+      throw new HttpErrors.Unauthorized('You are not authorized to update this user');
+    }
+    const userData = {
+      ...user,
+      updatedAt: new Date(),
+    }
+    if (userData?.password) {
+      userData.password = await this.hasher.hashPassword(userData.password);
+    }
+    await this.userRepository.updateById(id, userData);
   }
 
   @put('/users/{id}')
@@ -116,8 +120,13 @@ export class UserController {
   })
   async replaceById(
     @param.path.string('id') id: string,
+    @inject(AuthenticationBindings.CURRENT_USER)
+    currentUser: UserProfile,
     @requestBody() user: User,
   ): Promise<void> {
+    if (currentUser.id !== id) {
+      throw new HttpErrors.Unauthorized('You are not authorized to delete this user');
+    }
     await this.userRepository.replaceById(id, user);
   }
 
@@ -125,7 +134,14 @@ export class UserController {
   @response(204, {
     description: 'User DELETE success',
   })
-  async deleteById(@param.path.string('id') id: string): Promise<void> {
+  async deleteById(
+    @param.path.string('id') id: string,
+    @inject(AuthenticationBindings.CURRENT_USER)
+    currentUser: UserProfile,
+  ): Promise<void> {
+    if (currentUser.id !== id) {
+      throw new HttpErrors.Unauthorized('You are not authorized to delete this user');
+    }
     await this.userRepository.deleteById(id);
   }
 }

@@ -6,7 +6,7 @@ entity Project {
   ~updatedBy: ObjectID
   --
   *name: String
-  *createdAt: Date
+  createdAt: Date
   updatedAt: Date
   isDeleted: Boolean
 }
@@ -23,7 +23,7 @@ entity User {
   --
   *email: String
   *password: String
-  *createdAt: Date
+  createdAt: Date
   name: String
   updatedAt: Date
   isDeleted: Boolean
@@ -38,8 +38,8 @@ entity Task {
   ~updatedBy: ObjectID
   --
   *name: String
-  *createdAt: Date
   *isCreatedByAdmin: Boolean
+  createdAt: Date
   updatedAt: Date
   isDeleted: Boolean
   status: EStatus

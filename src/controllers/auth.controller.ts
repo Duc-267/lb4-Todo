@@ -37,7 +37,9 @@ import {
       responses: {
         '200': {
           description: 'Sign up a new user',
-          content: {'application/json': {schema: getModelSchemaRef(User)}},
+          content: {'application/json': {
+            schema: getModelSchemaRef(User)
+          }},
         },
       },
     })
@@ -47,7 +49,7 @@ import {
           'application/json': {
             schema: getModelSchemaRef(User, {
               title: 'NewUser',
-              exclude: ['id'],
+              exclude: ['id','createdAt', 'updatedAt', 'isDeleted'],
             }),
           },
         },
@@ -86,9 +88,8 @@ import {
       @requestBody(CredentialsRequestBody) credentials: Credentials,
     ): Promise<{token: string}> {
       const user = await this.userService.verifyCredentials(credentials);
-      const userProfile = await this.userService.convertToUserProfile(user);
+      const userProfile = this.userService.convertToUserProfile(user);
       const token = await this.jwtService.generateToken(userProfile);
       return Promise.resolve({token});
     }
-  
   }

@@ -1,5 +1,7 @@
-import { authenticate } from '@loopback/authentication';
+import { authenticate, AuthenticationBindings } from '@loopback/authentication';
+import { inject } from '@loopback/core';
 import {
+  AnyObject,
   Count,
   CountSchema,
   Filter,
@@ -18,13 +20,19 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
-import {Project} from '../models';
-import {ProjectRepository} from '../repositories';
+import { UserProfile } from '@loopback/security';
+import {Project, ProjectUser} from '../models';
+import {ProjectRepository, ProjectUserRepository} from '../repositories';
+import * as _ from 'lodash';
+import { ERole } from '../constants';
+
 @authenticate('jwt')
 export class ProjectController {
   constructor(
     @repository(ProjectRepository)
     public projectRepository : ProjectRepository,
+    @repository(ProjectUserRepository)
+    public projectUserRepository : ProjectUserRepository,
   ) {}
 
   @post('/projects')
@@ -38,15 +46,25 @@ export class ProjectController {
         'application/json': {
           schema: getModelSchemaRef(Project, {
             title: 'NewProject',
-            exclude: ['id'],
+            exclude: ['id', 'createdAt', 'updatedAt', 'isDeleted'],
           }),
         },
       },
     })
     project: Omit<Project, 'id'>,
-  ): Promise<Project> {
-    return this.projectRepository.create(project);
-  }
+    @inject(AuthenticationBindings.CURRENT_USER)
+    currentUser: UserProfile,
+  ): Promise<void> {
+    const userId = currentUser.id;
+    const createdProject = await this.projectRepository.create(project)
+    const projectId = createdProject.id;
+    const projectUser  = {
+      userId,
+      projectId,
+      role: ERole.ADMIN,
+    };
+    await this.projectUserRepository.create(projectUser);
+  } 
 
   @get('/projects/count')
   @response(200, {

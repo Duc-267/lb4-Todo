@@ -1,3 +1,4 @@
+import { authenticate } from '@loopback/authentication';
 import {
   repository,
 } from '@loopback/repository';
@@ -11,6 +12,7 @@ import {
 } from '../models';
 import {TaskRepository} from '../repositories';
 
+@authenticate('jwt')
 export class TaskTaskController {
   constructor(
     @repository(TaskRepository)

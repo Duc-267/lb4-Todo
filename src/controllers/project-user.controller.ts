@@ -1,3 +1,4 @@
+import { authenticate } from '@loopback/authentication';
 import {
   Count,
   CountSchema,
@@ -7,7 +8,6 @@ import {
   Where,
 } from '@loopback/repository';
 import {
-  post,
   param,
   get,
   getModelSchemaRef,
@@ -16,36 +16,16 @@ import {
   del,
   requestBody,
   response,
+  post,
 } from '@loopback/rest';
 import {ProjectUser} from '../models';
 import {ProjectUserRepository} from '../repositories';
-
+@authenticate('jwt')
 export class ProjectUserController {
   constructor(
     @repository(ProjectUserRepository)
     public projectUserRepository : ProjectUserRepository,
   ) {}
-
-  @post('/project-users')
-  @response(200, {
-    description: 'ProjectUser model instance',
-    content: {'application/json': {schema: getModelSchemaRef(ProjectUser)}},
-  })
-  async create(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(ProjectUser, {
-            title: 'NewProjectUser',
-            exclude: ['id'],
-          }),
-        },
-      },
-    })
-    projectUser: Omit<ProjectUser, 'id'>,
-  ): Promise<ProjectUser> {
-    return this.projectUserRepository.create(projectUser);
-  }
 
   @get('/project-users/count')
   @response(200, {
@@ -76,25 +56,6 @@ export class ProjectUserController {
     return this.projectUserRepository.find(filter);
   }
 
-  @patch('/project-users')
-  @response(200, {
-    description: 'ProjectUser PATCH success count',
-    content: {'application/json': {schema: CountSchema}},
-  })
-  async updateAll(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(ProjectUser, {partial: true}),
-        },
-      },
-    })
-    projectUser: ProjectUser,
-    @param.where(ProjectUser) where?: Where<ProjectUser>,
-  ): Promise<Count> {
-    return this.projectUserRepository.updateAll(projectUser, where);
-  }
-
   @get('/project-users/{id}')
   @response(200, {
     description: 'ProjectUser model instance',
@@ -111,6 +72,27 @@ export class ProjectUserController {
     return this.projectUserRepository.findById(id, filter);
   }
 
+  @post('/project-users')
+  @response(200, {
+    description: 'ProjectUser model instance',
+    content: {'application/json': {schema: getModelSchemaRef(ProjectUser)}},
+  })
+  async create(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(ProjectUser, {
+            title: 'NewProjectUser',
+            exclude: ['id'],
+          }),
+        },
+      },
+    })
+    projectUser: Omit<ProjectUser, 'id'>,
+  ): Promise<ProjectUser> {
+    return this.projectUserRepository.create(projectUser);
+  }
+  
   @patch('/project-users/{id}')
   @response(204, {
     description: 'ProjectUser PATCH success',

@@ -1,6 +1,7 @@
+import { EStatus } from './../constants';
 import {Entity, model, property, belongsTo} from '@loopback/repository';
-import {User} from './user.model';
-import {Project} from './project.model';
+import { User, UserWithRelations } from './user.model';
+import {Project, ProjectWithRelations} from './project.model';
 
 @model()
 export class Task extends Entity {
@@ -21,11 +22,10 @@ export class Task extends Entity {
     type: 'date',
     default: () => new Date(),
   })
-  createdAt: string;
+  createdAt: Date;
 
   @property({
-    type: 'boolean',
-    default: false,
+    type: 'boolean'
   })
   isCreatedByAdmin?: boolean;
 
@@ -33,7 +33,7 @@ export class Task extends Entity {
     type: 'date',
     default: () => new Date(),
   })
-  updatedAt?: string;
+  updatedAt: Date;
 
   @property({
     type: 'boolean',
@@ -43,8 +43,11 @@ export class Task extends Entity {
 
   @property({
     type: 'string',
+    jsonSchema: {
+      enum: Object.values(EStatus),
+    },
   })
-  status?: string;
+  status?: EStatus;
 
   @belongsTo(() => User, {name: 'creator'})
   createdBy: string;
@@ -65,6 +68,10 @@ export class Task extends Entity {
 
 export interface TaskRelations {
   // describe navigational properties here
+  creator?: UserWithRelations;
+  assignee?: UserWithRelations;
+  linked?: TaskWithRelations;
+  project?: ProjectWithRelations;
 }
 
 export type TaskWithRelations = Task & TaskRelations;

@@ -25,18 +25,19 @@ export class User extends Entity {
     type: 'date',
     default: () => new Date(),
   })
-  createdAt: string;
+  createdAt: Date;
 
   @property({
     type: 'string',
+    required: true,
   })
-  name?: string;
+  name: string;
 
   @property({
     type: 'date',
     default: () => new Date(),
   })
-  updatedAt?: string;
+  updatedAt?: Date;
 
   @property({
     type: 'boolean',

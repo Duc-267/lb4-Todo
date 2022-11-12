@@ -1,4 +1,5 @@
-import {Entity, model, property} from '@loopback/repository';
+import {Entity, model, property, hasMany} from '@loopback/repository';
+import {Task} from './task.model';
 
 @model()
 export class Project extends Entity {
@@ -33,6 +34,8 @@ export class Project extends Entity {
   })
   isDeleted?: boolean;
 
+  @hasMany(() => Task)
+  tasks: Task[];
 
   constructor(data?: Partial<Project>) {
     super(data);
