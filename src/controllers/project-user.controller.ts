@@ -18,13 +18,15 @@ import {
   response,
   post,
 } from '@loopback/rest';
-import {ProjectUser} from '../models';
-import {ProjectUserRepository} from '../repositories';
+import {Project, ProjectUser, User} from '../models';
+import {ProjectRepository, ProjectUserRepository} from '../repositories';
 @authenticate('jwt')
 export class ProjectUserController {
   constructor(
     @repository(ProjectUserRepository)
     public projectUserRepository : ProjectUserRepository,
+    @repository(ProjectRepository)
+    public projectRepository : ProjectRepository,
   ) {}
 
   @get('/project-users/count')
@@ -128,5 +130,22 @@ export class ProjectUserController {
   })
   async deleteById(@param.path.string('id') id: string): Promise<void> {
     await this.projectUserRepository.deleteById(id);
+  }
+  @get('/projects/{id}/creator', {
+    responses: {
+      '200': {
+        description: 'Creator of to Project',
+        content: {
+          'application/json': {
+            schema: {type: 'array', items: getModelSchemaRef(User)},
+          },
+        },
+      },
+    },
+  })
+  async getUser(
+    @param.path.string('id') id: typeof Project.prototype.id,
+  ): Promise<User> {
+    return this.projectRepository.creator(id);
   }
 }

@@ -46,7 +46,7 @@ export class ProjectController {
         'application/json': {
           schema: getModelSchemaRef(Project, {
             title: 'NewProject',
-            exclude: ['id', 'createdAt', 'updatedAt', 'isDeleted'],
+            exclude: ['id', 'createdAt', 'updatedAt', 'isDeleted', 'createdBy'],
           }),
         },
       },
@@ -56,6 +56,7 @@ export class ProjectController {
     currentUser: UserProfile,
   ): Promise<void> {
     const userId = currentUser.id;
+    _.set(project, 'createdBy', userId);
     const createdProject = await this.projectRepository.create(project)
     const projectId = createdProject.id;
     const projectUser  = {
