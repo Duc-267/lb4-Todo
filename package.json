@@ -59,6 +59,7 @@
     "@loopback/rest-explorer": "^5.0.4",
     "@loopback/service-proxy": "^5.0.4",
     "loopback-connector-mongodb": "^5.6.0",
+    "node-cron": "^3.0.2",
     "nodemon": "^2.0.20",
     "tslib": "^2.0.0"
   },

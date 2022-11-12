@@ -93,7 +93,7 @@ export class ProjectTaskController {
         'application/json': {
           schema: getModelSchemaRef(Task, {
             title: 'NewTask',
-            exclude: ['id', 'projectId', 'status', 'createdAt', 'updatedAt', 'isDeleted','isCreatedByAdmin', 'createdBy'],
+            exclude: ['id', 'projectId', 'status', 'createdAt', 'updatedAt', 'isDeleted','isCreatedByAdmin', 'createdBy', 'doneTime'],
             optional: ['asignedTo', 'linkedTo']
           }),
         },
@@ -160,6 +160,9 @@ export class ProjectTaskController {
     const newTask = {
       ...task,
       updatedAt: new Date()
+    }
+    if (task?.status === EStatus.DONE) {
+      newTask.doneTime = new Date();
     }
     await this.taskRepository.updateById(taskId, newTask);
   }

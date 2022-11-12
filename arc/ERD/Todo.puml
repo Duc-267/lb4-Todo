@@ -43,6 +43,7 @@ entity Task {
   updatedAt: Date
   isDeleted: Boolean
   status: EStatus
+  doneTime: Date
 }
 enum ERole {
   ADMIN
