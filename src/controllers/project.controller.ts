@@ -37,8 +37,7 @@ export class ProjectController {
 
   @post('/projects')
   @response(200, {
-    description: 'Project model instance',
-    content: {'application/json': {schema: getModelSchemaRef(Project)}},
+    description: 'Project model instance'
   })
   async create(
     @requestBody({

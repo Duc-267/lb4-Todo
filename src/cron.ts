@@ -23,7 +23,7 @@ export class Cron {
   }
 
   private async cleanDoneTasks() {
-    const oneDay = 10000 ;
+    const oneDay = 1000 * 24 * 60 * 60;
     const tasks = await this.taskRepository.find({
       where: {
         status: EStatus.DONE
